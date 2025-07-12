@@ -1,0 +1,70 @@
+# Dockerfile для рендеринга PlantUML диаграмм в SVG
+# Основан на официальном PlantUML Docker образе
+
+FROM plantuml/plantuml:latest
+
+# Устанавливаем дополнительные зависимости для работы с файлами
+RUN apt-get update && apt-get install -y \
+    bash \
+    findutils \
+    grep \
+    && rm -rf /var/lib/apt/lists/*
+
+# Устанавливаем Python
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Создаем рабочую директорию
+WORKDIR /workspace
+
+# Создаем скрипт для рендеринга всех PlantUML файлов
+RUN echo '#!/bin/bash\n\
+set -e\n\
+\n\
+# Проверяем наличие аргумента с путем к папке\n\
+if [ $# -eq 0 ]; then\n\
+    echo "Использование: $0 <путь_к_папке>"\n\
+    echo "Пример: $0 /workspace/docs/architecture/diagrams"\n\
+    exit 1\n\
+fi\n\
+\n\
+TARGET_DIR="$1"\n\
+\n\
+# Проверяем существование директории\n\
+if [ ! -d "$TARGET_DIR" ]; then\n\
+    echo "Ошибка: Директория $TARGET_DIR не существует"\n\
+    exit 1\n\
+fi\n\
+\n\
+echo "Поиск PlantUML файлов в $TARGET_DIR..."\n\
+\n\
+# Находим все .puml файлы и рендерим их в SVG\n\
+find "$TARGET_DIR" -name "*.puml" -type f | while read -r puml_file; do\n\
+    echo "Обработка: $puml_file"\n\
+    \n\
+    # Получаем путь к файлу и имя без расширения\n\
+    dir_path=$(dirname "$puml_file")\n\
+    filename=$(basename "$puml_file" .puml)\n\
+    \n\
+    # Рендерим в SVG\n\
+    java -jar /opt/plantuml.jar -tsvg "$puml_file"\n\
+    \n\
+    # Проверяем успешность рендеринга\n\
+    svg_file="$dir_path/$filename.svg"\n\
+    if [ -f "$svg_file" ]; then\n\
+        echo "✓ Успешно создан: $svg_file"\n\
+    else\n\
+        echo "✗ Ошибка при создании SVG для: $puml_file"\n\
+    fi\n\
+done\n\
+\n\
+echo "Рендеринг завершен!"\n\
+' > /usr/local/bin/render-plantuml && chmod +x /usr/local/bin/render-plantuml
+
+# Копируем Python-скрипт
+COPY render_plantuml.py /usr/local/bin/render_plantuml.py
+
+# Устанавливаем точку входа
+ENTRYPOINT ["python3", "/usr/local/bin/render_plantuml.py"]
