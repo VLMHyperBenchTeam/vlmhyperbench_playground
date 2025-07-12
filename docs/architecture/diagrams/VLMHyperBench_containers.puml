@@ -1,0 +1,35 @@
+@startuml VLMHyperBench_containers
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title VLMHyperBench - Контейнеры и процессы (C4 Level 2)
+
+Person(user, "Пользователь", "Исследователь или разработчик")
+
+System_Boundary(vlmhyperbench, "VLMHyperBench") {
+    Container(orchestration, "Оркестрация", "Python", "Управляет выполнением задач и этапов")
+    Container(training, "Этап Обучение модели", "Python", "Обучение VLM модели")
+    Container(inference, "Этап Получение Ответов", "Python", "Генерация ответов модели")
+    Container(evaluation, "Этап Оценка Ответов", "Python", "Вычисление метрик")
+    Container(reports, "Этап Генерация отчетов", "Python", "Создание отчетов")
+}
+
+System_Ext(model_file, "Файл модели", "Сохраненная обученная модель")
+System_Ext(model_answers, "Model_Answers.csv", "Ответы модели на тестовые данные")
+System_Ext(metrics_csv, "Metrics.csv", "Результаты оценки метрик")
+System_Ext(reports_md, "Отчеты.md", "Финальные отчеты")
+
+Rel(user, orchestration, "Запускает", "CLI")
+
+Rel(orchestration, training, "запускает")
+Rel(orchestration, inference, "запускает")
+Rel(orchestration, evaluation, "запускает")
+Rel(orchestration, reports, "запускает")
+
+Rel(training, model_file, "производит")
+Rel(inference, model_answers, "производит")
+Rel(evaluation, metrics_csv, "производит")
+Rel(reports, reports_md, "производит")
+
+@enduml

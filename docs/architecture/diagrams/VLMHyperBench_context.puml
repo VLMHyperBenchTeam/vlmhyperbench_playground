@@ -1,0 +1,17 @@
+@startuml VLMHyperBench_context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Контекст системы VLMHyperBench (C4 Level 1)
+
+Person(user, "Пользователь", "Пользователь системы VLMHyperBench")
+
+System(vlmhyperbench, "VLMHyperBench", "Система для оценки VLM моделей")
+
+System_Ext(reports, "Отчеты.md", "Файл с результатами оценки")
+
+Rel(user, vlmhyperbench, "Запускает VLMHyperBench", "CLI/API")
+Rel(vlmhyperbench, reports, "Генерирует", "Markdown")
+
+@enduml

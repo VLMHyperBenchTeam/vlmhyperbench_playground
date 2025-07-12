@@ -1,0 +1,47 @@
+@startuml VLMHyperBench_single_task_detail
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title VLMHyperBench - Детализация одного Task
+
+Person(user, "Пользователь", "Исследователь или разработчик")
+
+System_Boundary(vlmhyperbench, "VLMHyperBench") {
+    Container(orchestration, "Оркестрация", "Python", "Управляет выполнением задач")
+
+    Container_Boundary(single_task, "Детализация Task") {
+        Component(training, "Обучение модели", "Python", "Этап обучения")
+        Component(inference, "Получение ответов", "Python", "Этап инференса")
+        Component(evaluation, "Оценка ответов", "Python", "Этап оценки")
+        Component(reports, "Генерация отчетов", "Python", "Этап отчетов")
+        Component(result, "Результат", "Python", "Финальный результат")
+    }
+}
+
+System_Ext(training_config, "Конфиг обучения", "Конфигурация для обучения")
+System_Ext(test_dataset, "Test dataset", "Тестовые данные")
+System_Ext(metrics_list, "Список метрик", "Метрики для оценки")
+System_Ext(model_file, "Файл модели", "Обученная модель")
+System_Ext(model_answers, "Model Answers.csv", "Ответы модели")
+System_Ext(metrics_csv, "Metrics.csv", "Результаты метрик")
+System_Ext(reports_md, "Отчеты.md", "Финальные отчеты")
+
+Rel(user, orchestration, "Запускает", "CLI")
+Rel(orchestration, single_task, "управляет", "API")
+
+Rel(training_config, training, "считывает")
+Rel(test_dataset, inference, "считывает")
+Rel(metrics_list, evaluation, "считывает")
+
+Rel(training, model_file, "производит")
+Rel(inference, model_answers, "производит")
+Rel(evaluation, metrics_csv, "производит")
+Rel(reports, reports_md, "производит")
+
+Rel(training, inference, "Файл модели")
+Rel(inference, evaluation, "Model Answers.csv")
+Rel(evaluation, reports, "Metrics.csv")
+Rel(reports, result, "Отчеты.md")
+
+@enduml

@@ -1,0 +1,39 @@
+@startuml VLMHyperBench_task_concept
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title VLMHyperBench - Концепция Task
+
+Person(user, "Пользователь", "Исследователь или разработчик")
+
+System_Boundary(vlmhyperbench, "VLMHyperBench") {
+    Container(orchestration, "Оркестрация", "Python", "Управляет выполнением задач")
+
+    Container(task1, "Task 1", "Python", "Первая задача")
+    Container(task2, "Task 2", "Python", "Вторая задача")
+    Container(task3, "Task 3", "Python", "Третья задача")
+
+    Container_Boundary(task_structure, "Структура Task") {
+        Container(stage1, "1 Обучение модели", "Python", "Этап обучения")
+        Container(stage2, "2 Получение ответов", "Python", "Этап инференса")
+        Container(stage3, "3 Оценка ответов", "Python", "Этап оценки")
+        Container(stage4, "4 Генерация отчетов", "Python", "Этап отчетов")
+    }
+}
+
+Rel(user, orchestration, "Запускает", "CLI")
+
+Rel(orchestration, task1, "запускает")
+Rel(orchestration, task2, "запускает")
+Rel(orchestration, task3, "запускает")
+
+Rel(task1, stage1, "использует")
+Rel(task2, stage1, "использует")
+Rel(task3, stage1, "использует")
+
+Rel(stage1, stage2, "следующий этап")
+Rel(stage2, stage3, "следующий этап")
+Rel(stage3, stage4, "следующий этап")
+
+@enduml

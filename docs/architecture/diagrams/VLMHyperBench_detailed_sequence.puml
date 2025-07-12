@@ -1,0 +1,47 @@
+@startuml VLMHyperBench_detailed_sequence
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title VLMHyperBench - Детализированное представление (последовательность)
+
+Person(user, "Пользователь", "Исследователь или разработчик")
+
+System_Boundary(vlmhyperbench, "VLMHyperBench") {
+    Container(orchestration, "Оркестрация", "Python", "Управляет выполнением задач")
+
+    Container_Boundary(task1, "Task 1") {
+        Container(t1a, "1 Обучение модели", "Python", "Этап обучения")
+        Container(t1b, "2 Получение ответов", "Python", "Этап инференса")
+        Container(t1c, "3 Оценка ответов", "Python", "Этап оценки")
+        Container(t1d, "4 Генерация отчетов", "Python", "Этап отчетов")
+    }
+
+    Container_Boundary(task2, "Task 2") {
+        Container(t2a, "1 Обучение модели", "Python", "Этап обучения")
+        Container(t2b, "2 Получение ответов", "Python", "Этап инференса")
+        Container(t2c, "3 Оценка ответов", "Python", "Этап оценки")
+        Container(t2d, "4 Генерация отчетов", "Python", "Этап отчетов")
+    }
+}
+
+System_Ext(reports1, "Отчеты.md", "Отчеты Task 1")
+System_Ext(reports2, "Отчеты.md", "Отчеты Task 2")
+
+Rel(user, orchestration, "Запускает", "CLI")
+
+Rel(orchestration, task1, "запускает")
+Rel(orchestration, task2, "запускает")
+
+Rel(t1a, t1b, "следующий этап")
+Rel(t1b, t1c, "следующий этап")
+Rel(t1c, t1d, "следующий этап")
+
+Rel(t2a, t2b, "следующий этап")
+Rel(t2b, t2c, "следующий этап")
+Rel(t2c, t2d, "следующий этап")
+
+Rel(t1d, reports1, "производит")
+Rel(t2d, reports2, "производит")
+
+@enduml

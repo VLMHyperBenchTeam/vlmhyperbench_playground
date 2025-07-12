@@ -1,0 +1,69 @@
+@startuml VLMHyperBench_data_detail
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title VLMHyperBench - Детализация данных (C4 Level 3)
+
+Person(user, "Пользователь", "Исследователь или разработчик")
+
+System_Boundary(vlmhyperbench, "VLMHyperBench") {
+    Container(orchestration, "Оркестрация", "Python", "Управляет выполнением задач")
+
+    Container_Boundary(training_stage, "Этап Обучение") {
+        Component(training, "Обучение модели", "Python", "Обучение VLM модели")
+    }
+
+    Container_Boundary(inference_stage, "Этап Получение Ответов") {
+        Component(inference, "Получение ответов", "Python", "Генерация ответов модели")
+    }
+
+    Container_Boundary(evaluation_stage, "Этап Оценка") {
+        Component(evaluation, "Оценка ответов", "Python", "Вычисление метрик")
+    }
+
+    Container_Boundary(reports_stage, "Этап Отчеты") {
+        Component(reports, "Генерация отчетов", "Python", "Создание отчетов")
+    }
+}
+
+System_Ext(trainval_dataset, "TrainVal_dataset", "Данные для обучения и валидации")
+System_Ext(model, "Модель", "Базовая модель для обучения")
+System_Ext(tokenizer, "Токенизатор", "Токенизатор модели")
+System_Ext(training_config, "Конфиг обучения", "Конфигурация обучения")
+System_Ext(model_file, "Файл модели", "Обученная модель")
+System_Ext(test_dataset, "Test_dataset", "Тестовые данные")
+System_Ext(predict_params, "Параметры предикта", "Параметры для инференса")
+System_Ext(model_answers, "Model_Answers.csv", "Ответы модели")
+System_Ext(metrics_list, "Список метрик", "Метрики для оценки")
+System_Ext(metrics_csv, "Metrics.csv", "Результаты метрик")
+System_Ext(reports_md, "Отчеты.md", "Финальные отчеты")
+System_Ext(task_list, "Список Task", "Список задач")
+System_Ext(model_base, "База моделей", "База доступных моделей")
+System_Ext(metrics_base, "База метрик", "База доступных метрик")
+
+Rel(user, orchestration, "Запускает", "CLI")
+
+Rel(trainval_dataset, training, "считывает")
+Rel(model, training, "считывает")
+Rel(tokenizer, training, "считывает")
+Rel(training_config, training, "считывает")
+Rel(training, model_file, "производит")
+
+Rel(model_file, inference, "считывает")
+Rel(test_dataset, inference, "считывает")
+Rel(predict_params, inference, "считывает")
+Rel(inference, model_answers, "производит")
+
+Rel(model_answers, evaluation, "считывает")
+Rel(metrics_list, evaluation, "считывает")
+Rel(evaluation, metrics_csv, "производит")
+
+Rel(metrics_csv, reports, "считывает")
+Rel(reports, reports_md, "производит")
+
+Rel(task_list, orchestration, "считывает")
+Rel(model_base, orchestration, "считывает")
+Rel(metrics_base, orchestration, "считывает")
+
+@enduml
