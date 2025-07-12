@@ -8,130 +8,42 @@ date: 2025-07-12
 ---
 ### 1. Контекст системы (C4 Level 1)
 
-```mermaid
-flowchart TD
-    Пользователь[Пользователь] -->|Запускает VLMHyperBench| VLMHyperBench
-    VLMHyperBench[VLMHyperBench\nСистема для оценки VLM моделей] -->|Генерирует| Отчеты.md
-```
+![VLMHyperBench_context](/docs/architecture/diagrams/VLMHyperBench_context.svg)
+
+[Исходник диаграммы](/docs/architecture/diagrams/VLMHyperBench_context.puml)
 
 ### 2. Контейнеры и процессы (C4 Level 2)
 
-```mermaid
-flowchart TD
-    Оркестрация[Оркестрация] -->|запускает| Обучение
-    Оркестрация -->|запускает| Получение_ответов
-    Оркестрация -->|запускает| Оценка
-    Оркестрация -->|запускает| Отчеты
-    Обучение[Этап Обучение модели] -->|производит| Файл_модели
-    Получение_ответов[Этап Получение Ответов] -->|производит| Model_Answers.csv
-    Оценка[Этап Оценка Ответов] -->|производит| Metrics.csv
-    Отчеты[Этап Генерация отчетов] -->|производит| Отчеты.md
-```
+![VLMHyperBench_containers](/docs/architecture/diagrams/VLMHyperBench_containers.svg)
+
+[Исходник диаграммы](/docs/architecture/diagrams/VLMHyperBench_containers.puml)
 
 ### Концепция Task
 
-Концепция **Task** или Задач.
+![VLMHyperBench_task_concept](/docs/architecture/diagrams/VLMHyperBench_task_concept.svg)
 
-```mermaid
-flowchart TD
-    Оркестрация -->|запускает| Task1[Task 1]
-    Оркестрация -->|запускает| Task2[Task 2]
-    Оркестрация -->|запускает| Task3[Task 3]
-
-    subgraph Задача [Структура Task]
-        direction LR
-        Этап1[1 Обучение модели] --> Этап2[2 Получение ответов]
-        Этап2 --> Этап3[3 Оценка ответов]
-        Этап3 --> Этап4[4 Генерация отчетов]
-    end
-
-    Task1 --> Задача
-    Task2 --> Задача
-    Task3 --> Задача
-```
+[Исходник диаграммы](/docs/architecture/diagrams/VLMHyperBench_task_concept.puml)
 
 ###  Детализированное представление (показывает последовательность)
 
-```mermaid
-flowchart TB
-    Оркестрация -->|запускает| Task1
-    Оркестрация -->|запускает| Task2
+![VLMHyperBench_detailed_sequence](/docs/architecture/diagrams/VLMHyperBench_detailed_sequence.svg)
 
-    subgraph Task1 [Task 1]
-        direction TB
-        T1A[1 Обучение модели] --> T1B[2 Получение ответов]
-        T1B --> T1C[3 Оценка ответов]
-        T1C --> T1D[4 Генерация отчетов]
-    end
-
-    subgraph Task2 [Task 2]
-        direction TB
-        T2A[1 Обучение модели] --> T2B[2 Получение ответов]
-        T2B --> T2C[3 Оценка ответов]
-        T2C --> T2D[4 Генерация отчетов]
-    end
-
-    T1D --> Отчет1[Отчеты.md]
-    T2D --> Отчет2[Отчеты.md]
-```
+[Исходник диаграммы](/docs/architecture/diagrams/VLMHyperBench_detailed_sequence.puml)
 
 ### Необязательность этапов каждого Task.
 
-![The_optionality_of_each_stage_in_the_Task](/docs/architecture/optionality_of_each_stage_in_the_Task.svg)
+![The_optionality_of_each_stage_in_the_Task](/docs/architecture/diagrams/optionality_of_each_stage_in_the_Task.svg)
 
-[Исходник диаграммы](/docs/architecture/optionality_of_each_stage_in_the_Task.puml)
-
+[Исходник диаграммы](/docs/architecture/diagrams/optionality_of_each_stage_in_the_Task.puml)
 
 ### Дополнительно: Диаграмма уровня 3 (детализация одного Task)
 
-```mermaid
-flowchart LR
-    subgraph Один_Task [Детализация Task]
-        A[Обучение модели] -->|"Файл модели"| B[Получение ответов]
-        B -->|"Model Answers.csv"| C[Оценка ответов]
-        C -->|"Metrics.csv"| D[Генерация отчетов]
-        D -->|"Отчеты.md"| Результат
-    end
+![VLMHyperBench_single_task_detail](/docs/architecture/diagrams/VLMHyperBench_single_task_detail.svg)
 
-    %% Входные данные
-    Конфиг_обучения --> A
-    Test_dataset --> B
-    Список_метрик --> C
+[Исходник диаграммы](/docs/architecture/diagrams/VLMHyperBench_single_task_detail.puml)
 
-    %% Взаимодействие
-    Оркестрация -.->|управляет| Один_Task
-```
+### 3. Детализация данных (C4 Level 3)
 
-### 3. Детализация данных (C4 Level 3)# Название заметки
+![VLMHyperBench_data_detail](/docs/architecture/diagrams/VLMHyperBench_data_detail.svg)
 
-
-
-```mermaid
-flowchart LR
-    %% Для этапа обучения
-    Обучение[Этап Обучение] -->|считывает| TrainVal_dataset
-    Обучение -->|считывает| Модель
-    Обучение -->|считывает| Токенизатор
-    Обучение -->|считывает| Конфиг_обучения
-    Обучение -->|производит| Файл_модели
-
-    %% Для этапа получения ответов
-    Получение_ответов -->|считывает| Файл_модели
-    Получение_ответов -->|считывает| Test_dataset
-    Получение_ответов -->|считывает| Параметры_предикта
-    Получение_ответов -->|производит| Model_Answers.csv
-
-    %% Для этапа оценки
-    Оценка -->|считывает| Model_Answers.csv
-    Оценка -->|считывает| Список_метрик
-    Оценка -->|производит| Metrics.csv
-
-    %% Для этапа отчетов
-    Отчеты -->|считывает| Metrics.csv
-    Отчеты -->|производит| Отчеты.md
-
-    %% Общие данные
-    Оркестрация -->|считывает| Список_Task
-    Оркестрация -->|считывает| База_моделей
-    Оркестрация -->|считывает| База_метрик
-```
+[Исходник диаграммы](/docs/architecture/diagrams/VLMHyperBench_data_detail.puml)
