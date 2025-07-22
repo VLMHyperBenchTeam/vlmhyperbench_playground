@@ -12,7 +12,7 @@ __pycache__
 model_cache
 
 # ignore dataset
-dataset
+datasets
 dataset_for_training.zip
 
 # ignore prompts
