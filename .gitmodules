@@ -19,6 +19,3 @@
 [submodule "tools/release_tool"]
 	path = tools/release_tool
 	url = https://github.com/VLMHyperBenchTeam/release_tool.git
-[submodule "tools/plantuml-docker-renderer"]
-	path = tools/plantuml-docker-renderer
-	url = https://github.com/VLMHyperBenchTeam/plantuml-docker-renderer.git
