@@ -50,11 +50,6 @@ plantuml-docker-renderer/
 └── LICENSE
 ```
 
-### CI/CD:
-- Автоматическая сборка Docker образа при push
-- Публикация в GitHub Container Registry
-- Тегирование версий (latest, v1.0.0, etc.)
-
 ### Docker образ:
 - Registry: `ghcr.io/vlmhyperbenchteam/plantuml-renderer`
 - Базовый образ: `plantuml/plantuml:latest`
@@ -75,9 +70,8 @@ plantuml-docker-renderer/
 
 ## Критерии готовности
 
-- [ ] Создан GitHub репозиторий `VLMHyperBenchTeam/plantuml-docker-renderer`
-- [ ] Перенесены все файлы из основного проекта
-- [ ] Настроен CI/CD для GitHub Container Registry
+- [x] Создан GitHub репозиторий `VLMHyperBenchTeam/plantuml-docker-renderer`
+- [x] Перенесены все файлы из основного проекта
 - [ ] Добавлен submodule в основной проект
 - [ ] Обновлена документация в основном проекте
 - [ ] Протестирована работа с образом из GitHub Container Registry
