@@ -1,0 +1,61 @@
+[project]
+name = "release_tool"
+version = "0.1.0.dev0"
+description = "Multi-stage release helper for monorepos (stages 1-6)."
+authors = [ { name = "VLMHyperBench Team" } ]
+requires-python = ">=3.10"
+dependencies = [
+    "tomlkit>=0.13",
+    "packaging>=23.0",
+]
+
+# CLI entry-points – удобно вызывать стадии как executables
+[project.scripts]
+release-tool-stage0 = "release_tool.stage0:run"
+release-tool-stage1 = "release_tool.stage1:run"
+release-tool-stage2 = "release_tool.stage2:run"
+release-tool-stage3 = "release_tool.stage3:run"
+release-tool-stage4 = "release_tool.stage4:run"
+release-tool-stage5 = "release_tool.stage5:run"
+release-tool-stage6 = "release_tool.stage6:run"
+release-tool-clear  = "release_tool.clear:run"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["release_tool"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "B"]
+ignore = ["E501", "E402"]
+
+[tool.mypy]
+python_version = "3.10"
+# Включаем строгий режим проверок (sub-set mypy strict)
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+warn_unused_ignores = true
+warn_return_any = true
+show_error_codes = true
+ignore_missing_imports = true
+
+# Временное подавление «шумных» ошибок от tomlkit и subprocess.run.
+# Когда будут написаны собственные TypedDict wrappers или улучшены типы tomlkit, это уберём.
+disable_error_code = [
+    "call-overload",  # subprocess.run kwargs typing
+    "index",          # tomlkit Item | Container сложные юнионы
+    "operator",
+    "union-attr",
+    "assignment",
+    "no-any-return",
+    "unused-ignore",
+]
+
+# tomlkit предоставляет mypy-плагин, который улучшает типизацию TOML-объектов.
+# plugins = ["tomlkit.mypy_plugin"] # removed

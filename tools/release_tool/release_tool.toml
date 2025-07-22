@@ -1,0 +1,31 @@
+[tool.release_tool]
+# Путь к каталогу с пакетами
+packages_dir = "packages"
+
+# Путь к prod/pyproject.toml, где обновляется тег пакета при релизе (Stage 5)
+prod_pyproject_path = "prod/pyproject.toml"
+
+# Путь к staging/pyproject.toml, где фиксируются dev-теги (Stage 4)
+staging_pyproject_path = "staging/pyproject.toml"
+
+# Имя текстового файла, в котором пользователь сохраняет сгенерированный LLM commit-message
+commit_message_filename = "commit_message.txt"
+
+# Файл-сообщение для тега
+tag_message_filename = "tag_message.txt"
+
+# Файлы с изменениями
+changes_uncommitted_filename = "changes_uncommitted.txt"
+changes_since_tag_filename = "changes_since_tag.txt"
+
+# Каталог, куда складываются файлы изменений (будут созданы подкаталоги с именами пакетов)
+changes_output_dir = "release_tool/changes"
+
+# Префикс тега (например, v1.2.3)
+tag_prefix = "v"
+
+# Имя удалённого репозитория для push
+git_remote = "origin"
+
+# Сухой режим. Если true, скрипты только печатают действия, но не выполняют git-команды
+dry_run = false

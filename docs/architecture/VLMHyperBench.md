@@ -12,6 +12,8 @@ date: 2025-07-12
 
 [Исходник диаграммы](/docs/architecture/diagrams/VLMHyperBench_context.puml)
 
+Пользователь `VLMHyperBench` формирует файл конфигурации
+
 ### 2. Контейнеры и процессы (C4 Level 2)
 
 ![VLMHyperBench_containers](/docs/architecture/diagrams/VLMHyperBench_containers.svg)
