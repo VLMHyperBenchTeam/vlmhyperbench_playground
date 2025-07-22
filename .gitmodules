@@ -19,3 +19,7 @@
 [submodule "packages/prompt_handler"]
 	path = packages/prompt_handler
 	url = https://github.com/VLMHyperBenchTeam/prompt_handler.git
+
+[submodule "plantuml-docker-renderer"]
+	path = plantuml-docker-renderer
+	url = https://github.com/VLMHyperBenchTeam/plantuml-docker-renderer.git
