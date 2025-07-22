@@ -1,0 +1,28 @@
+@startuml
+skinparam rectangle {
+    roundCorner 10
+    borderColor #000
+    borderWidth 1
+}
+skinparam defaultTextAlignment center
+skinparam wrapWidth 250
+
+' === Определение узлов с понятными идентификаторами и многострочным текстом ===
+uv_workspace : для этапа
+Docker_Image : для этапа
+uv_venv : для этапа
+Docker_Container : для этапа
+Singularity_Image : для этапа
+Singularity_Container : для этапа
+RunPod_pod : для этапа
+
+' === Связи между узлами ===
+uv_workspace --> Docker_Image : собрать\nобраз из\nuv workspace
+uv_workspace --> uv_venv : развернуть\nvenv\nокружение
+
+Docker_Image --> Docker_Container : запустить
+Docker_Image --> Singularity_Image : конвертировать
+Docker_Image --> RunPod_pod : развернуть
+
+Singularity_Image --> Singularity_Container : запустить
+@enduml
