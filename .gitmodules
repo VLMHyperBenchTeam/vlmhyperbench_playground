@@ -16,12 +16,6 @@
 [submodule "packages/prompt_handler"]
 	path = packages/prompt_handler
 	url = https://github.com/VLMHyperBenchTeam/prompt_handler.git
-[submodule "plantuml-docker-renderer"]
-	path = tools/plantuml-docker-renderer
-	url = https://github.com/VLMHyperBenchTeam/plantuml-docker-renderer.git
-[submodule "release_tool"]
-	path = tools/release_tool
-	url = https://github.com/VLMHyperBenchTeam/release_tool.git
 [submodule "tools/release_tool"]
 	path = tools/release_tool
 	url = https://github.com/VLMHyperBenchTeam/release_tool.git
