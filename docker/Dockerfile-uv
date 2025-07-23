@@ -44,11 +44,16 @@ ENV PATH=/root/.local/bin:$PATH
 # 2.a deps-dev: окружение из корневого uv.lock (workspace + исходники)
 ###############################################################################
 FROM base AS deps-devp
+ARG TORCH_INDEX
+ARG EXTRA_INDEX
+ARG INDEX_STRATEGY
+ARG TOML_PATH=pyproject.toml
 WORKDIR /build
 COPY ${TOML_PATH} pyproject.toml
-COPY ${LOCK_PATH} uv.lock
+COPY release_tool.toml release_tool.toml
+COPY py310_cu124.lock uv.lock
 COPY packages ./packages
-COPY release_tool ./release_tool
+COPY tools/release_tool ./release_tool
 RUN uv pip sync uv.lock \
     --index-url ${TORCH_INDEX} \
     --extra-index-url ${EXTRA_INDEX} \
@@ -58,9 +63,13 @@ RUN uv pip sync uv.lock \
 # 2.b deps-prod: минимальное окружение из prod-lock (без исходников)
 ###############################################################################
 FROM base AS deps-prod
+ARG TORCH_INDEX
+ARG EXTRA_INDEX
+ARG INDEX_STRATEGY
+ARG TOML_PATH=prod/pyproject.toml
 WORKDIR /build
 COPY ${TOML_PATH} pyproject.toml
-COPY ${LOCK_PATH} uv.lock
+COPY prod/uv.lock uv.lock
 RUN uv pip sync uv.lock \
     --index-url ${TORCH_INDEX} \
     --extra-index-url ${EXTRA_INDEX} \
@@ -117,9 +126,13 @@ CMD ["/bin/bash"]
 # 4.b Финальный образ PROD
 ###############################################################################
 FROM base AS prod
+ARG TORCH_INDEX
+ARG EXTRA_INDEX
+ARG INDEX_STRATEGY
+ARG TOML_PATH=prod/pyproject.toml
 WORKDIR /workspace
 COPY ${TOML_PATH} pyproject.toml
-COPY ${LOCK_PATH} uv.lock
+COPY prod/uv.lock uv.lock
 RUN uv pip sync uv.lock \
     --index-url ${TORCH_INDEX} \
     --extra-index-url ${EXTRA_INDEX} \
