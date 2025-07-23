@@ -22,7 +22,7 @@ model-qwen2-5-vl = { workspace = true }
 prompt-handler = { workspace = true }
 print-utils = { workspace = true }
 hello-world = { workspace = true }
-release-tool = { path = "release_tool" }
+release-tool = { path = "tools/release_tool" }
 
 # источники PyTorch/torchvision для разных backend-экстра
 torch = [
