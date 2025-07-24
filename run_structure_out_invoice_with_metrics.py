@@ -1,9 +1,11 @@
 import subprocess
 import json
-from typing import Any, Dict, List
+from typing import Dict, List
 
-
-from model_qwen2_5_vl import initialize_qwen_model
+import model_qwen2_5_vl.models
+from model_interface.model_factory import ModelFactory
+from model_interface.model_utils import load_model_config
+from prompt_handler import load_prompt
 from jiwer import cer
 
 
@@ -174,106 +176,59 @@ def evaluate_document_extraction(
 
 
 if __name__ == "__main__":
-    # Инициализируем модель
-    model: Any = initialize_qwen_model(model_name="Qwen2.5-VL-7B-Instruct")
+    # Регистрация моделей
+    model_qwen2_5_vl.models.register_models()
+
+    # Загрузка конфигурации модели
+    model_config = load_model_config("model_config.json")
+
+    # Инициализация модели
+    model = ModelFactory.initialize_model(model_config)
+
+    # Загрузка промпта
+    prompt = load_prompt("prompts/erpai/invoice_extraction_prompt_improved.txt")
 
     # Пути к данным
-    image_path = "datasets/dataset-erpai/invoices/images/2507-483129-77644-Счет на оплату_page_0.png"  # noqa: E501
-    reference_path = "datasets/dataset-erpai/invoices/json/2507-483129-77644-Счет на оплату_page_0.json"  # noqa: E501
+    image_path = "datasets/dataset-erpai/invoices/images/2507-483129-77644-Счет на оплату_page_0.png"
+    reference_path = "datasets/dataset-erpai/invoices/json/2507-483129-77644-Счет на оплату_page_0.json"
 
     # Загружаем эталонные данные
     with open(reference_path, "r", encoding="utf-8") as f:
         reference_data = json.load(f)
 
-    # Формируем вопрос для модели
-    question = """
-Подано изображение счета.
-Пожалуйста, извлеките информацию и представьте её в виде структурированного JSON-объекта с указанными полями.
-
-Поля для извлечения:
-- "supplier_name": Наименование компании-поставщика
-- "supplier_address": Юридический адрес поставщика
-- "supplier_actual_address": Фактический адрес (если отличается)
-- "supplier_inn": ИНН поставщика
-- "supplier_kpp": КПП поставщика
-- "supplier_ogrn": ОГРН поставщика
-- "bank_name": Название банка
-- "bank_bik": БИК банка
-- "account_number": Номер счета
-- "correspondent_account": Корреспондентский счет
-- "invoice_number": Номер счета
-- "invoice_date": Дата выставления (в формате DD.MM.YYYY)
-- "payment_terms": Срок оплаты
-- "payment_conditions": Условия оплаты
-- "service_period": Период оказания услуг
-- "total_amount": Сумма к оплате
-- "currency": Валюта расчетов
-- "vat_rate": Ставка НДС
-- "vat_amount": Сумма НДС
-- "amount_without_vat": Сумма без НДС
-- "items": Список товаров/услуг (см. структуру ниже)
-- "basis": Основание для выставления счета
-- "contact_person": Контактное лицо
-- "contact_phone": Контактный телефон
-- "signature": Подпись уполномоченного лица
-
-Структура товаров/услуг:
-{
-  "name": "Наименование товара/услуги",
-  "quantity": "Количество",
-  "unit": "Единица измерения",
-  "price": "Цена за единицу",
-  "amount": "Стоимость позиции"
-}
-
-JSON-структура:
-{
-  "supplier_name": "",
-  "supplier_address": "",
-  "supplier_actual_address": "",
-  "supplier_inn": "",
-  "supplier_kpp": "",
-  "supplier_ogrn": "",
-  "bank_name": "",
-  "bank_bik": "",
-  "account_number": "",
-  "correspondent_account": "",
-  "invoice_number": "",
-  "invoice_date": "",
-  "payment_terms": "",
-  "payment_conditions": "",
-  "service_period": "",
-  "total_amount": "",
-  "currency": "",
-  "vat_rate": "",
-  "vat_amount": "",
-  "amount_without_vat": "",
-  "items": [],
-  "basis": "",
-  "contact_person": "",
-  "contact_phone": "",
-  "signature": ""
-}
-"""
-
     # Получаем ответ модели
-    model_answer = model.predict_on_image(image=image_path, prompt=question)
+    model_answer = model.predict_on_image(image=image_path, prompt=prompt)
     print("Ответ модели:")
     print(model_answer)
 
     # Пытаемся распарсить ответ модели
     try:
-        hypothesis_data = json.loads(model_answer)
+        # Удаляем markdown-разметку, если она присутствует
+        cleaned_answer = model_answer.strip()
+        if cleaned_answer.startswith("```json"):
+            cleaned_answer = cleaned_answer[7:]
+        if cleaned_answer.endswith("```"):
+            cleaned_answer = cleaned_answer[:-3]
+        cleaned_answer = cleaned_answer.strip()
+
+        # Заменяем некорректные символы с помощью регулярного выражения
+        import re
+        cleaned_answer = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', cleaned_answer)
+
+        hypothesis_data = json.loads(cleaned_answer)
     except json.JSONDecodeError as e:
         print(f"Ошибка при парсинге JSON: {e}")
         print("Попробуем извлечь JSON из текста...")
         # Простая попытка найти JSON в тексте
         import re
 
-        json_match = re.search(r"\{[\s\S]*\}", model_answer)
+        json_match = re.search(r"\{[\s\S]*\}", cleaned_answer)
         if json_match:
             try:
-                hypothesis_data = json.loads(json_match.group())
+                # Применяем очистку и к найденному JSON
+                cleaned_json = json_match.group().strip()
+                cleaned_json = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', cleaned_json)
+                hypothesis_data = json.loads(cleaned_json)
             except json.JSONDecodeError as e2:
                 print(f"Не удалось извлечь валидный JSON: {e2}")
                 hypothesis_data = {}
