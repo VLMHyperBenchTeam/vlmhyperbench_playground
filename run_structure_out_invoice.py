@@ -1,8 +1,8 @@
-import json
 import subprocess
 
 import model_qwen2_5_vl.models
 from model_interface.model_factory import ModelFactory
+from model_interface.model_utils import load_model_config
 from prompt_handler import load_prompt
 
 # Константы для путей к файлам
@@ -12,21 +12,6 @@ IMAGE_PATH = (
     "datasets/dataset-erpai/invoices/images/"
     "2507-483129-77644-Счет на оплату_page_0.png"
 )
-
-
-def load_model_config(config_path: str) -> dict:
-    """Загружает конфигурацию модели из JSON файла."""
-    try:
-        with open(config_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        raise FileNotFoundError(
-            f"Файл конфигурации не найден: {config_path}"
-        ) from None
-    except json.JSONDecodeError as e:
-        raise ValueError(
-            f"Ошибка парсинга JSON в файле {config_path}: {e}"
-        ) from e
 
 
 def main():
