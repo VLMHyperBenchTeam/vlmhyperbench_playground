@@ -1,0 +1,14 @@
+{
+    "common_params": {
+        "model_family": "Qwen2.5-VL",
+        "model_name": "Qwen2.5-VL-7B-Instruct",
+        "cache_dir": "model_cache",
+        "device_map": "auto",
+        "system_prompt": ""
+    },
+    "specific_params": {
+        "min_pixels": 200704,
+        "max_pixels": 1003520,
+        "attn_implementation": "eager"
+    }
+}
