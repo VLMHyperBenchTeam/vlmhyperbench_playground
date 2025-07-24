@@ -10,9 +10,6 @@
 [submodule "packages/print_utils"]
 	path = packages/print_utils
 	url = https://github.com/VLMHyperBenchTeam/print_utils.git
-[submodule "packages/hello_world"]
-	path = packages/hello_world
-	url = https://github.com/VLMHyperBenchTeam/hello_world.git
 [submodule "packages/prompt_handler"]
 	path = packages/prompt_handler
 	url = https://github.com/VLMHyperBenchTeam/prompt_handler.git
@@ -22,3 +19,6 @@
 [submodule "tools/plantuml-docker-renderer"]
 	path = tools/plantuml-docker-renderer
 	url = https://github.com/VLMHyperBenchTeam/plantuml-docker-renderer.git
+[submodule "packages/hello_world"]
+	path = packages/hello_world
+	url = https://github.com/VLMHyperBenchTeam/hello_world.git
