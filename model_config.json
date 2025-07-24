@@ -9,6 +9,7 @@
     "specific_params": {
         "min_pixels": 200704,
         "max_pixels": 1003520,
-        "attn_implementation": "eager"
+        "attn_implementation": "eager",
+        "max_new_tokens": 512
     }
 }
