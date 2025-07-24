@@ -7,7 +7,8 @@ from bench_utils.metrics import calculate_classification_metrics
 from bench_utils.model_utils import load_prompt, prepare_prompt
 from bench_utils.utils import load_config, save_results_to_csv
 from model_interface.model_factory import ModelFactory
-import model_qwen2_5_vl.models  # Импорт для автоматической регистрации модели  # noqa: F401
+import model_qwen2_5_vl.models
+model_qwen2_5_vl.models.register_models()
 from print_utils import (  # type: ignore
     print_error,
     print_header,

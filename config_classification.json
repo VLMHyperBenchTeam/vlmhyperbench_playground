@@ -1,6 +1,6 @@
 {
     "task": {
-        "dataset_path": "./dataset",
+        "dataset_path": "./datasets/dataset_ozon",
         "prompt_path": "./prompts/classification_2_stage_new.txt",
         "subsets": ["clean"],
         "sample_size": 3
