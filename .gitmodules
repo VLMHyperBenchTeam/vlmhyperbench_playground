@@ -22,3 +22,6 @@
 [submodule "packages/hello_world"]
 	path = packages/hello_world
 	url = https://github.com/VLMHyperBenchTeam/hello_world.git
+[submodule "packages/metrics_invoice"]
+	path = packages/metrics_invoice
+	url = https://github.com/VLMHyperBenchTeam/metrics_invoice
