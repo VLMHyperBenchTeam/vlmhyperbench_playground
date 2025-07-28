@@ -1,0 +1,39 @@
+@startuml
+title Architecture: Model Interface and Implementations
+
+' Устанавливаем вертикальное направление
+top to bottom direction
+
+package "model_interface" as interface_pkg {
+  class TextModelInterface
+  class StructuredModelInterface
+  class ModelFactory
+}
+
+package "model_qwen2_5_vl_hf" as hf_pkg {
+  class Qwen25VLTextModel_HF
+}
+
+package "model_qwen2_5_vl_vllm" as vllm_pkg {
+  class Qwen25VLTextModel_VLLM
+  class Qwen25VLStructuredModel
+}
+
+' Связи реализации
+Qwen25VLTextModel_HF --|> TextModelInterface : implements
+Qwen25VLTextModel_VLLM --|> TextModelInterface : implements
+Qwen25VLStructuredModel --|> StructuredModelInterface : implements
+
+' Связи фабрики
+ModelFactory ..> TextModelInterface : creates
+ModelFactory ..> StructuredModelInterface : creates
+
+' Принудительное вертикальное расположение блоков
+interface_pkg -[hidden]d-> hf_pkg
+hf_pkg -[hidden]d-> vllm_pkg
+
+' Заметки
+note top of interface_pkg : Core interfaces and factory
+note bottom of hf_pkg : HuggingFace implementation
+note bottom of vllm_pkg : VLLM implementation
+@enduml
