@@ -11,12 +11,12 @@ dependencies = [
     "hello-world",
     "tabulate>=0.9.0",
     "packaging>=23.0",
-    "pandas>=2.3.0",
     "tqdm>=4.67.1",
-    "jiwer>=4.0.0",
     "vllm>=0.4.0",
     "pydantic>=2.0.0",
     "outlines>=0.0.38",
+    "json-repair>=0.48.0",
+    "metrics-invoice",
 ]
 
 [tool.uv.sources]
@@ -27,6 +27,7 @@ prompt-handler = { workspace = true }
 print-utils = { workspace = true }
 hello-world = { workspace = true }
 release-tool = { path = "tools/release_tool" }
+metrics-invoice = { workspace = true }
 
 # источники PyTorch/torchvision для разных backend-экстра
 torch = [
