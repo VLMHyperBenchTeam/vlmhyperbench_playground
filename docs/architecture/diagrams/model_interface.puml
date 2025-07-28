@@ -11,11 +11,11 @@ package "model_interface" as interface_pkg {
 }
 
 package "model_qwen2_5_vl_hf" as hf_pkg {
-  class Qwen25VLTextModel_HF
+  class "Qwen25VLTextModel" as Qwen25VLTextModel_HF
 }
 
 package "model_qwen2_5_vl_vllm" as vllm_pkg {
-  class Qwen25VLTextModel_VLLM
+  class "Qwen25VLTextModel" as Qwen25VLTextModel_VLLM
   class Qwen25VLStructuredModel
 }
 
