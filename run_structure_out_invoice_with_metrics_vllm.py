@@ -3,8 +3,9 @@ import json
 from typing import Dict, List
 from pydantic import BaseModel
 from vllm import AsyncEngineArgs, AsyncLLMEngine
-from vllm.sampling_params import SamplingParams
+from vllm.sampling_params import SamplingParams, GuidedDecodingParams
 import asyncio
+from metrics_invoice import metrics
 
 
 # Определяем Pydantic модели для структуры данных
@@ -58,6 +59,11 @@ async def get_model_response_with_structured_output(image_path: str, prompt: str
     max_model_len = model_config["specific_params"]["max_new_tokens"]
     cache_dir = model_config["common_params"]["cache_dir"]
 
+    # Создаем директорию кэша, если она не существует
+    import os
+
+    os.makedirs(cache_dir, exist_ok=True)
+
     # Настройка асинхронного движка vLLM
     engine_args = AsyncEngineArgs(
         model=model_name,
@@ -67,18 +73,18 @@ async def get_model_response_with_structured_output(image_path: str, prompt: str
         enable_prefix_caching=True,
         mm_processor_kwargs={"max_pixels": max_pixels},
         limit_mm_per_prompt={"image": 1},
-        download_dir=cache_dir
+        download_dir=os.path.abspath(cache_dir),
     )
 
     engine = AsyncLLMEngine.from_engine_args(engine_args)
 
     # Параметры семплирования с guided decoding
+    guided_decoding_params = GuidedDecodingParams(
+        json=InvoiceData.model_json_schema()
+    )
+
     sampling_params = SamplingParams(
-        temperature=0.1,
-        max_tokens=2048,
-        stop=["<|im_end|>"],
-        guided_json=InvoiceData.model_json_schema(),
-        guided_decoding_backend="outlines",
+        temperature=0.1, max_tokens=8000, stop=["\n"], guided_decoding=guided_decoding_params
     )
 
     # Формируем сообщение в формате chat
@@ -106,82 +112,17 @@ async def get_model_response_with_structured_output(image_path: str, prompt: str
     async for request_output in results_generator:
         final_output = request_output
 
-    if final_output:
-        # Возвращаем сгенерированный текст как словарь
-        return json.loads(final_output.outputs[0].text)
+    if final_output and final_output.outputs:
+        try:
+            # Возвращаем сгенерированный текст как словарь
+            result = json.loads(final_output.outputs[0].text)
+            return result
+        except json.JSONDecodeError as e:
+            print(f"Ошибка парсинга JSON: {e}")
+            print(f"Текст ответа модели: {final_output.outputs[0].text}")
+            return {}
 
     return {}
-
-
-def calculate_cer_score(reference: str, hypothesis: str) -> float:
-    """
-    Рассчитывает CER (Character Error Rate) между эталонным и предсказанным текстом.
-    Возвращает значение от 0 до 1, где 0 - полное совпадение.
-    """
-    if not reference and not hypothesis:
-        return 0.0
-    if not reference or not hypothesis:
-        return 1.0
-
-    # Простая реализация CER
-    # В реальности можно использовать jiwer, но для примера используем простой алгоритм
-    import difflib
-
-    seq_matcher = difflib.SequenceMatcher(None, reference, hypothesis)
-    return 1.0 - seq_matcher.ratio()
-
-
-def is_field_correct(cer_score: float, threshold: float = 0.15) -> bool:
-    """
-    Определяет, правильно ли извлечено поле на основе порога CER.
-    По умолчанию порог 15%.
-    """
-    return cer_score <= threshold
-
-
-def calculate_item_f1(
-    item_reference: Dict, item_hypothesis: Dict, item_fields: List[str], cer_threshold: float = 0.15
-) -> float:
-    """
-    Рассчитывает F1-меру для одной позиции (item) на основе CER для каждого поля.
-
-    Args:
-        item_reference: Словарь с эталонными значениями полей позиции
-        item_hypothesis: Словарь с предсказанными значениями полей позиции
-        item_fields: Список названий полей, которые нужно оценить
-        cer_threshold: Порог CER для определения правильности поля (по умолчанию 0.15)
-
-    Returns:
-        F1-мера для позиции
-    """
-    if not item_reference or not item_hypothesis:
-        return 0.0
-
-    correct_fields = 0
-    total_fields = len(item_fields)
-
-    for field in item_fields:
-        ref_value = str(item_reference.get(field, ""))
-        hyp_value = str(item_hypothesis.get(field, ""))
-        field_cer = calculate_cer_score(ref_value, hyp_value)
-        if is_field_correct(field_cer, cer_threshold):
-            correct_fields += 1
-
-    precision = correct_fields / total_fields if total_fields > 0 else 0
-    recall = correct_fields / total_fields if total_fields > 0 else 0
-
-    if precision + recall == 0:
-        return 0.0
-
-    return 2 * (precision * recall) / (precision + recall)
-
-
-def is_item_correct(f1_score: float, threshold: float = 0.85) -> bool:
-    """
-    Определяет, правильно ли распознана позиция на основе порога F1-меры.
-    По умолчанию порог 85%.
-    """
-    return f1_score >= threshold
 
 
 def evaluate_document_extraction(
@@ -207,87 +148,20 @@ def evaluate_document_extraction(
     Returns:
         Словарь с результатами оценки
     """
-    results = {"field_metrics": {}, "item_metrics": {}, "overall_metrics": {}}
-
-    # Оценка основных полей
-    correct_fields = 0
-    total_fields = len(document_fields)
-
-    for field in document_fields:
-        ref_value = str(reference.get(field, ""))
-        hyp_value = str(hypothesis.get(field, ""))
-        field_cer = calculate_cer_score(ref_value, hyp_value)
-        field_correct = is_field_correct(field_cer)
-
-        results["field_metrics"][field] = {
-            "reference": ref_value,
-            "hypothesis": hyp_value,
-            "cer": field_cer,
-            "correct": field_correct,
-        }
-
-        if field_correct:
-            correct_fields += 1
-
-    # Оценка позиций (items)
-    ref_items = reference.get("items", [])
-    hyp_items = hypothesis.get("items", [])
-
-    item_f1_scores = []
-    correct_items = 0
-    total_items = len(ref_items)
-
-    # Сравниваем позиции по порядку
-    for i in range(min(len(ref_items), len(hyp_items))):
-        item_f1 = calculate_item_f1(ref_items[i], hyp_items[i], item_fields, cer_threshold)
-        item_f1_scores.append(item_f1)
-
-        if is_item_correct(item_f1, item_f1_threshold):
-            correct_items += 1
-
-    # Если в гипотезе больше позиций, оцениваем оставшиеся как неправильные
-    for _ in range(len(hyp_items), len(ref_items)):
-        item_f1_scores.append(0.0)
-
-    # Если в эталоне больше позиций, они не будут учтены в correct_items
-    avg_item_f1 = sum(item_f1_scores) / len(item_f1_scores) if item_f1_scores else 0.0
-
-    results["item_metrics"] = {
-        "reference_count": len(ref_items),
-        "hypothesis_count": len(hyp_items),
-        "correct_count": correct_items,
-        "item_f1_scores": item_f1_scores,
-        "average_item_f1": avg_item_f1,
-        "item_accuracy": correct_items / total_items if total_items > 0 else 0.0,
-    }
-
-    # Общие метрики
-    field_precision = correct_fields / total_fields if total_fields > 0 else 0.0
-    field_recall = correct_fields / total_fields if total_fields > 0 else 0.0
-
-    if field_precision + field_recall == 0:
-        field_f1 = 0.0
-    else:
-        field_f1 = 2 * (field_precision * field_recall) / (field_precision + field_recall)
-
-    results["overall_metrics"] = {
-        "field_accuracy": correct_fields / total_fields,
-        "field_precision": field_precision,
-        "field_recall": field_recall,
-        "field_f1": field_f1,
-        "item_count_accuracy": 1.0 if len(ref_items) == len(hyp_items) else 0.0,
-        "overall_accuracy": (correct_fields + correct_items) / (total_fields + total_items)
-        if (total_fields + total_items) > 0
-        else 0.0,
-    }
-
-    return results
+    return metrics.evaluate_document_extraction(
+        reference,
+        hypothesis,
+        document_fields,
+        item_fields,
+        cer_threshold,
+        item_f1_threshold
+    )
 
 
 async def main():
     """Основная функция для выполнения обработки изображения."""
     # Загрузка промпта
-    with open("prompts/erpai/invoice_extraction_prompt_improved.txt", "r", encoding="utf-8") as f:
+    with open("prompts/erpai/invoice_extraction_prompt.txt", "r", encoding="utf-8") as f:
         prompt = f.read()
 
     # Пути к данным

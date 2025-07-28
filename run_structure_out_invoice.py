@@ -1,9 +1,11 @@
 import subprocess
+import json
 
 import model_qwen2_5_vl.models
 from model_interface.model_factory import ModelFactory
 from model_interface.model_utils import load_model_config
 from prompt_handler import load_prompt
+from json_repair import repair_json
 
 # Константы для путей к файлам
 MODEL_CONFIG_PATH = "model_config.json"
@@ -30,7 +32,16 @@ def main():
 
     # Получение ответа модели
     model_answer = model.predict_on_image(image=IMAGE_PATH, prompt=prompt)
-    print(model_answer)
+
+    # Попытка исправить и распарсить JSON
+    try:
+        fixed_json = repair_json(model_answer, return_objects=True)
+        print("Исправленный JSON:")
+        print(json.dumps(fixed_json, ensure_ascii=False, indent=2))
+    except Exception as e:
+        print(f"Ошибка при обработке JSON: {e}")
+        print("Оригинальный ответ модели:")
+        print(model_answer)
 
     # Отображаем использование GPU
     subprocess.run(["nvidia-smi"])

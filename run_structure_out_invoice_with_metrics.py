@@ -6,73 +6,8 @@ import model_qwen2_5_vl.models
 from model_interface.model_factory import ModelFactory
 from model_interface.model_utils import load_model_config
 from prompt_handler import load_prompt
-from jiwer import cer
-
-
-def calculate_cer_score(reference: str, hypothesis: str) -> float:
-    """
-    Рассчитывает CER (Character Error Rate) между эталонным и предсказанным текстом.
-    Возвращает значение от 0 до 1, где 0 - полное совпадение.
-    """
-    if not reference and not hypothesis:
-        return 0.0
-    if not reference or not hypothesis:
-        return 1.0
-
-    return cer(reference, hypothesis)
-
-
-def is_field_correct(cer_score: float, threshold: float = 0.15) -> bool:
-    """
-    Определяет, правильно ли извлечено поле на основе порога CER.
-    По умолчанию порог 15%.
-    """
-    return cer_score <= threshold
-
-
-def calculate_item_f1(
-    item_reference: Dict, item_hypothesis: Dict, item_fields: List[str], cer_threshold: float = 0.15
-) -> float:
-    """
-    Рассчитывает F1-меру для одной позиции (item) на основе CER для каждого поля.
-
-    Args:
-        item_reference: Словарь с эталонными значениями полей позиции
-        item_hypothesis: Словарь с предсказанными значениями полей позиции
-        item_fields: Список названий полей, которые нужно оценить
-        cer_threshold: Порог CER для определения правильности поля (по умолчанию 0.15)
-
-    Returns:
-        F1-мера для позиции
-    """
-    if not item_reference or not item_hypothesis:
-        return 0.0
-
-    correct_fields = 0
-    total_fields = len(item_fields)
-
-    for field in item_fields:
-        ref_value = str(item_reference.get(field, ""))
-        hyp_value = str(item_hypothesis.get(field, ""))
-        field_cer = calculate_cer_score(ref_value, hyp_value)
-        if is_field_correct(field_cer, cer_threshold):
-            correct_fields += 1
-
-    precision = correct_fields / total_fields if total_fields > 0 else 0
-    recall = correct_fields / total_fields if total_fields > 0 else 0
-
-    if precision + recall == 0:
-        return 0.0
-
-    return 2 * (precision * recall) / (precision + recall)
-
-
-def is_item_correct(f1_score: float, threshold: float = 0.85) -> bool:
-    """
-    Определяет, правильно ли распознана позиция на основе порога F1-меры.
-    По умолчанию порог 85%.
-    """
-    return f1_score >= threshold
+from json_repair import repair_json
+from metrics_invoice import metrics
 
 
 def evaluate_document_extraction(
@@ -98,81 +33,14 @@ def evaluate_document_extraction(
     Returns:
         Словарь с результатами оценки
     """
-    results = {"field_metrics": {}, "item_metrics": {}, "overall_metrics": {}}
-
-    # Оценка основных полей
-    correct_fields = 0
-    total_fields = len(document_fields)
-
-    for field in document_fields:
-        ref_value = str(reference.get(field, ""))
-        hyp_value = str(hypothesis.get(field, ""))
-        field_cer = calculate_cer_score(ref_value, hyp_value)
-        field_correct = is_field_correct(field_cer)
-
-        results["field_metrics"][field] = {
-            "reference": ref_value,
-            "hypothesis": hyp_value,
-            "cer": field_cer,
-            "correct": field_correct,
-        }
-
-        if field_correct:
-            correct_fields += 1
-
-    # Оценка позиций (items)
-    ref_items = reference.get("items", [])
-    hyp_items = hypothesis.get("items", [])
-
-    item_f1_scores = []
-    correct_items = 0
-    total_items = len(ref_items)
-
-    # Сравниваем позиции по порядку
-    for i in range(min(len(ref_items), len(hyp_items))):
-        item_f1 = calculate_item_f1(ref_items[i], hyp_items[i], item_fields, cer_threshold)
-        item_f1_scores.append(item_f1)
-
-        if is_item_correct(item_f1, item_f1_threshold):
-            correct_items += 1
-
-    # Если в гипотезе больше позиций, оцениваем оставшиеся как неправильные
-    for _ in range(len(hyp_items), len(ref_items)):
-        item_f1_scores.append(0.0)
-
-    # Если в эталоне больше позиций, они не будут учтены в correct_items
-    avg_item_f1 = sum(item_f1_scores) / len(item_f1_scores) if item_f1_scores else 0.0
-
-    results["item_metrics"] = {
-        "reference_count": len(ref_items),
-        "hypothesis_count": len(hyp_items),
-        "correct_count": correct_items,
-        "item_f1_scores": item_f1_scores,
-        "average_item_f1": avg_item_f1,
-        "item_accuracy": correct_items / total_items if total_items > 0 else 0.0,
-    }
-
-    # Общие метрики
-    field_precision = correct_fields / total_fields if total_fields > 0 else 0.0
-    field_recall = correct_fields / total_fields if total_fields > 0 else 0.0
-
-    if field_precision + field_recall == 0:
-        field_f1 = 0.0
-    else:
-        field_f1 = 2 * (field_precision * field_recall) / (field_precision + field_recall)
-
-    results["overall_metrics"] = {
-        "field_accuracy": correct_fields / total_fields,
-        "field_precision": field_precision,
-        "field_recall": field_recall,
-        "field_f1": field_f1,
-        "item_count_accuracy": 1.0 if len(ref_items) == len(hyp_items) else 0.0,
-        "overall_accuracy": (correct_fields + correct_items) / (total_fields + total_items)
-        if (total_fields + total_items) > 0
-        else 0.0,
-    }
-
-    return results
+    return metrics.evaluate_document_extraction(
+        reference,
+        hypothesis,
+        document_fields,
+        item_fields,
+        cer_threshold,
+        item_f1_threshold
+    )
 
 
 if __name__ == "__main__":
@@ -215,26 +83,13 @@ if __name__ == "__main__":
         import re
         cleaned_answer = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', cleaned_answer)
 
-        hypothesis_data = json.loads(cleaned_answer)
-    except json.JSONDecodeError as e:
-        print(f"Ошибка при парсинге JSON: {e}")
-        print("Попробуем извлечь JSON из текста...")
-        # Простая попытка найти JSON в тексте
-        import re
-
-        json_match = re.search(r"\{[\s\S]*\}", cleaned_answer)
-        if json_match:
-            try:
-                # Применяем очистку и к найденному JSON
-                cleaned_json = json_match.group().strip()
-                cleaned_json = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', cleaned_json)
-                hypothesis_data = json.loads(cleaned_json)
-            except json.JSONDecodeError as e2:
-                print(f"Не удалось извлечь валидный JSON: {e2}")
-                hypothesis_data = {}
-        else:
-            print("Не удалось найти JSON в ответе модели")
-            hypothesis_data = {}
+        # Пробуем исправить и распарсить JSON
+        hypothesis_data = repair_json(cleaned_answer, return_objects=True)
+    except Exception as e:
+        print(f"Ошибка при обработке JSON: {e}")
+        print("Оригинальный ответ модели:")
+        print(model_answer)
+        hypothesis_data = {}
 
     # Определяем структуру полей для оценки
     document_fields = [
