@@ -1,5 +1,5 @@
 [submodule "release_tool"]
-	path = release_tool
+	path = tools/release_tool
 	url = https://github.com/VLMHyperBenchTeam/release_tool.git
 [submodule "packages/model_interface"]
 	path = packages/model_interface
@@ -19,3 +19,15 @@
 [submodule "packages/prompt_handler"]
 	path = packages/prompt_handler
 	url = https://github.com/VLMHyperBenchTeam/prompt_handler.git
+[submodule "docs_site"]
+	path = docs_site
+	url = https://github.com/VLMHyperBenchTeam/VLMHyperBenchDocs.git
+[submodule "tools/plantuml-docker-renderer"]
+	path = tools/plantuml-docker-renderer
+	url = https://github.com/VLMHyperBenchTeam/plantuml-docker-renderer.git
+[submodule "VLMHyperBench"]
+	path = VLMHyperBench
+	url = https://github.com/VLMHyperBenchTeam/VLMHyperBench.git
+[submodule ".kilocode"]
+	path = .kilocode
+	url = https://github.com/medphisiker/vlmhyperbench_rules.git
