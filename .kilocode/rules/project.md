@@ -57,3 +57,10 @@ VLMHyperBench — это open-source фреймворк для оценки во
 4.  **Loop по задачам**:
     *   Запуск Docker-контейнера модели -> Монтирование данных -> `run_vlm.py` -> Генерация ответов (CSV).
     *   Запуск Docker-контейнера оценки -> Монтирование ответов -> `run_eval.py` -> Расчет метрик (CSV).
+
+## Документация и Решения (ADR)
+Ключевые архитектурные решения и концепции задокументированы в папке `docs/docs_new/`:
+
+*   **Архитектурная концепция**: [`docs/docs_new/01_architecture_concept.md`](docs/docs_new/01_architecture_concept.md) — Основной документ, описывающий модульную архитектуру, изоляцию и взаимодействие компонентов.
+*   **Architecture Decision Records (ADR)**: [`docs/docs_new/09_architecture_decision_records.md`](docs/docs_new/09_architecture_decision_records.md) — Фиксация важных технических решений (изоляция, динамические зависимости, API wrapper).
+*   **Сравнительный анализ**: [`docs/docs_new/10_comparative_analysis.md`](docs/docs_new/10_comparative_analysis.md) — Сравнение с EvalScope и другими фреймворками.
