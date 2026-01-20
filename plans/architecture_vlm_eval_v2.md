@@ -166,12 +166,12 @@ stateDiagram-v2
 ```mermaid
 graph LR
     subgraph "Management Plane"
-        UI[Web UI - React] <--> API[API Server - FastAPI]
-        API <--> DB[(Database)]
+        UI[Web UI - React] <--> BE[Backend - FastAPI]
+        BE <--> DB[(Database)]
     end
 
     subgraph "Execution Plane"
-        API <--> Orch[Orchestrator]
+        BE <--> Orch[Orchestrator]
         Orch --> Stage1[Inference Stage]
         Orch --> Stage2[Evaluation Stage]
     end
