@@ -1,24 +1,9 @@
 [submodule "release_tool"]
 	path = tools/release_tool
 	url = https://github.com/VLMHyperBenchTeam/release_tool.git
-[submodule "packages/model_interface"]
-	path = packages/model_interface
-	url = https://github.com/VLMHyperBenchTeam/model_interface.git
-[submodule "packages/model_qwen2.5-vl"]
-	path = packages/model_qwen2.5-vl
-	url = https://github.com/VLMHyperBenchTeam/model_qwen2.5-vl.git
 [submodule "packages/bench_utils"]
 	path = packages/bench_utils
 	url = https://github.com/VLMHyperBenchTeam/bench_utils.git
-[submodule "packages/print_utils"]
-	path = packages/print_utils
-	url = https://github.com/VLMHyperBenchTeam/print_utils.git
-[submodule "packages/hello_world"]
-	path = packages/hello_world
-	url = https://github.com/VLMHyperBenchTeam/hello_world.git
-[submodule "packages/prompt_handler"]
-	path = packages/prompt_handler
-	url = https://github.com/VLMHyperBenchTeam/prompt_handler.git
 [submodule "docs_site"]
 	path = docs_site
 	url = https://github.com/VLMHyperBenchTeam/VLMHyperBenchDocs.git
