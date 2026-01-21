@@ -1,6 +1,3 @@
-[submodule "release_tool"]
-	path = tools/release_tool
-	url = https://github.com/VLMHyperBenchTeam/release_tool.git
 [submodule "packages/bench_utils"]
 	path = packages/bench_utils
 	url = https://github.com/VLMHyperBenchTeam/bench_utils.git

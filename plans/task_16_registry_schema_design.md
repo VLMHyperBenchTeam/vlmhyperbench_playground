@@ -1,99 +1,39 @@
 # Задача 16: Проектирование Схем Реестров (Configuration Schemas)
 
-## Цель
-Разработать детальные схемы (Pydantic Models / JSON Schema) для всех типов реестров и конфигурационных файлов, обеспечивая связность и валидацию данных.
+## Статус: ВЫПОЛНЕНО ✅
 
-## Концепция
-`MLTask` определяет "интерфейс" задачи (какие данные нужны, какие метрики применимы). `RunTask` — это конкретная реализация (какой датасет взять, какую модель запустить).
+## Итоги реализации
+Задача полностью реализована в рамках перехода на архитектуру v0.2.0. Старые CSV-конфиги заменены на атомарные YAML-реестры с поддержкой динамической композиции зависимостей.
 
-## 1. MLTask Schema (`ml_task.yaml`)
-Описывает тип задачи.
-```yaml
-name: "VQA"
-description: "Visual Question Answering"
-version: "1.0.0"
+### Что сделано:
+1.  **Пакет `packages/task-registry`**:
+    *   Реализованы Pydantic v2 схемы для всех сущностей (`MLTask`, `RunTask`, `Dataset`, `Metric`, `Report`, `Package`).
+    *   Создан `RegistryManager` с поддержкой `RUN_MODE=dev/prod` и автоматическим мерджингом `.dev.yaml` оверлеев.
+    *   Реализована кросс-валидация (проверка совместимости метрик и отчетов с типом задачи).
+2.  **Инфраструктура**:
+    *   Проект переведен на **Python 3.13** и **uv 0.9.26**.
+    *   Настроена система сборки **uv.build**.
+    *   Удалены устаревшие инструменты (`release-tool`) и `uv workspaces`.
+3.  **Документация**:
+    *   [ADR-011: Управление Реестрами и Режимы Исполнения](../docs_site/docs/architecture/adr/011-registry-management-and-run-modes.md).
+    *   [Исследование: Динамическая композиция зависимостей в 2026 году](../docs_site/docs/research/dynamic-dependency-composition-2026.md).
 
-# Требования к окружению
-environment:
-  entry_point: "vlmhyperbench.tasks.vqa" # Python module
-  default_packages: ["pillow", "torch"]
+## Где искать результаты:
+*   **Схемы**: `packages/task-registry/src/task_registry/schemas/`.
+*   **Логика загрузки**: `packages/task-registry/src/task_registry/manager.py`.
+*   **Тесты**: `packages/task-registry/tests/test_manager.py`.
+*   **Правила**: `.kilocode/rules/development.md`.
 
-# Интерфейс данных (для валидации датасета)
-dataset_interface:
-  type: "image_text_pair" # Ссылка на схему данных
-  required_fields: ["image_path", "question", "answer"]
+## Концепция (v0.2.0)
+Архитектура реестров строится на принципах **атомарности**, **динамического разрешения зависимостей** и поддержки **режимов исполнения (RUN_MODE)**.
 
-# Доступные метрики (ссылки на Metric Registry)
-supported_metrics:
-  - "anls"
-  - "cer"
-  - "bleu"
+### Основные сущности:
+*   **DependencySource**: Описание источника пакета (Local, Git, PyPI).
+*   **PackageDefinition**: Атомарный конфиг пакета в `registries/packages/`.
+*   **MLTask**: Определение типа задачи и разрешенных плагинов.
+*   **RunTask**: Конкретный запуск с выбором модели, датасета и метрик.
+*   **ExperimentPlan**: Группа RunTask'ов для параллельного запуска.
 
-# Доступные форматы отчетов
-supported_reports:
-  - "vqa_summary"
-  - "vqa_detailed"
-```
-
-## 2. Dataset Schema (`dataset.yaml`)
-Описывает конкретный датасет.
-```yaml
-name: "docvqa_ru"
-type: "vlmhyperbench.datasets.DocVQA" # Класс итератора
-path: "s3://datasets/docvqa_ru" # Или локальный путь
-split: "test"
-# Специфичные параметры для итератора
-params:
-  image_dir: "images/"
-  annotation_file: "val_v1.0.json"
-```
-
-## 3. RunTask Schema (`run_task.yaml`)
-Описывает единичный запуск.
-```yaml
-name: "qwen_docvqa_run_01"
-ml_task: "VQA" # Ссылка на MLTask
-
-model:
-  name: "Qwen2-VL-7B"
-  framework: "vllm"
-  docker_image: "vlmhyperbench/vlm-base-hf:latest"
-  # Параметры инференса
-  params:
-    temperature: 0.2
-    max_tokens: 1024
-
-dataset: "docvqa_ru" # Ссылка на Dataset Schema (или inline определение)
-
-metrics:
-  - "anls" # Должны быть в supported_metrics MLTask'а
-
-# Плагины (опционально)
-custom_packages:
-  - name: "my_custom_metric"
-    source: "./my_metrics"
-```
-
-## 4. Experiment Plan Schema (`experiment.yaml`)
-Группирует RunTasks.
-```yaml
-name: "Benchmark 2025"
-parallelism: 4
-tasks:
-  - "run_tasks/qwen_docvqa.yaml"
-  - "run_tasks/llava_docvqa.yaml"
-  # Inline definition
-  - name: "custom_run"
-    ml_task: "VQA"
-    ...
-```
-
-## Подзадачи
-1.  Создать Pydantic модели для каждой схемы в `packages/task_registry/schemas.py`.
-2.  Реализовать валидацию перекрестных ссылок (например, что метрика в RunTask разрешена в MLTask).
-3.  Написать тесты для валидатора.
-
-## Ожидаемый результат
-*   Строгая типизация конфигураций.
-*   Понятные сообщения об ошибках при неверном конфиге.
-*   Автогенерация документации по полям конфига.
+### Режимы исполнения (RUN_MODE):
+*   `prod` (default): Используются стабильные версии пакетов (Git tags, PyPI).
+*   `dev`: Приоритет отдается локальным версиям пакетов (`.dev.yaml` оверлеи).
