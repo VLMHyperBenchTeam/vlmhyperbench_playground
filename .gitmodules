@@ -10,6 +10,3 @@
 [submodule "VLMHyperBench"]
 	path = VLMHyperBench
 	url = https://github.com/VLMHyperBenchTeam/VLMHyperBench.git
-[submodule ".kilocode"]
-	path = .kilocode
-	url = https://github.com/medphisiker/vlmhyperbench_rules.git
