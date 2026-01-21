@@ -27,7 +27,9 @@
     *   Написать юнит-тесты для `PromptResolver`.
     *   Проверить разрешение конфликтов (когда есть и override, и mapping).
 
-## Ожидаемый результат
-*   Модуль `prompt_handler` поддерживает класс `PromptResolver`.
-*   Можно загрузить коллекцию промптов из JSON файла.
-*   Метод `resolve_prompt(item_metadata, config)` возвращает готовую строку промпта.
+## Ожидаемый результат ✅ ВЫПОЛНЕНО
+*   Модуль `prompt_manager` поддерживает класс `PromptResolver`.
+*   Можно загрузить коллекцию промптов из JSON файла через `PromptManager.from_json`.
+*   Метод `get_prompts(item_metadata, overrides, context)` возвращает словарь с готовыми строками промптов (`system_prompt`, `user_prompt`).
+*   Реализована иерархия приоритетов: Fixed Overrides > Mapping (doc_type) > Defaults.
+*   Поддерживается рендеринг шаблонов через Jinja2.
