@@ -1,6 +1,3 @@
-[submodule "packages/bench_utils"]
-	path = packages/bench_utils
-	url = https://github.com/VLMHyperBenchTeam/bench_utils.git
 [submodule "docs_site"]
 	path = docs_site
 	url = https://github.com/VLMHyperBenchTeam/VLMHyperBenchDocs.git
