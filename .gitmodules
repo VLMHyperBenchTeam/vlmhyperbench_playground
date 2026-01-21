@@ -4,9 +4,6 @@
 [submodule "docs_site"]
 	path = docs_site
 	url = https://github.com/VLMHyperBenchTeam/VLMHyperBenchDocs.git
-[submodule "tools/plantuml-docker-renderer"]
-	path = tools/plantuml-docker-renderer
-	url = https://github.com/VLMHyperBenchTeam/plantuml-docker-renderer.git
 [submodule "VLMHyperBench"]
 	path = VLMHyperBench
 	url = https://github.com/VLMHyperBenchTeam/VLMHyperBench.git
