@@ -8,23 +8,15 @@ P.S. Укажите одно из следующих названий при и�
 * Qwen2.5-VL-3B-Instruct
 * Qwen2.5-VL-7B-Instruct
 
-## Скачать к себе Docker-образ
+## 1. Запуск через Docker (рекомендуется)
 
-Docker-образ опубликован на `GitHub Packages Container Registry`([ссылка](https://github.com/VLMHyperBenchTeam/model_qwen2.5-vl/pkgs/container/qwen2.5-vl/438485241?tag=ubuntu22.04-cu124-torch2.4.0_eval_v0.1.0)).
+> 🚧 **Раздел находится в процессе обновления до v0.2.0**
 
-```
-docker pull ghcr.io/vlmhyperbenchteam/qwen2.5-vl:ubuntu22.04-cu124-torch2.4.0_eval_v0.1.0
-```
-
-## Run Docker Container
-
-Для запуска `Docker Container` выполним команду:
-```
-docker run \
-    --gpus all \
-    -it \
-    -v .:/workspace \
-    ghcr.io/vlmhyperbenchteam/qwen2.5-vl:ubuntu22.04-cu124-torch2.4.0_eval_v0.1.0 sh
+### 1.1 Запуск контейнера (интерактивно)
+```bash
+docker run --gpus all -it --rm \
+    -v $(pwd):/workspace \
+    ghcr.io/vlmhyperbenchteam/vlm-base-hf:latest sh
 ```
 
 Нам откроется терминал внутри `Docker Container`.
@@ -39,26 +31,15 @@ python run_vqa.py
 
 
 # Скачивание данных и промптов
-## промптов (старые из Google)
 
-```
-docker run \
-    --gpus all \
-    -it \
-    -v .:/workspace \
-    ghcr.io/vlmhyperbenchteam/qwen2.5-vl:ubuntu22.04-cu124-torch2.4.0_eval_v0.1.0 python downloaders/download_prompts.py
+### 1.2 Скачивание промптов
+```bash
+python3 downloaders/download_prompts.py
 ```
 
-## датасета для обучения (старый из Google)
-
-Скачать старый датасет от Насти.
-
-```
-docker run \
-    --gpus all \
-    -it \
-    -v .:/workspace \
-    ghcr.io/vlmhyperbenchteam/qwen2.5-vl:ubuntu22.04-cu124-torch2.4.0_eval_v0.1.0 python downloaders/download_dataset.py
+### 1.3 Скачивание датасета
+```bash
+python3 downloaders/download_dataset.py
 ```
 
 ## Разархивируем датасет для обучения (актуальный из mail.ru)
