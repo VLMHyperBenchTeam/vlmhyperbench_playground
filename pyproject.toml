@@ -19,9 +19,6 @@ environments = [
   "sys_platform == 'linux' and python_version >= '3.13'",
 ]
 
-[tool.uv.sources]
-release-tool = { path = "release_tool" }
-
 [build-system]
 requires = ["uv_build>=0.9.26"]
 build-backend = "uv_build"

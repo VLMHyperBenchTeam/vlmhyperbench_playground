@@ -35,12 +35,6 @@ cd cd workspace
 python run_vqa.py
 ```
 
-## Build Docker image
-
-Для сборки `Docker image` выполним команду:
-```
-docker build -t ghcr.io/vlmhyperbenchteam/qwen2.5-vl:ubuntu22.04-cu124-torch2.4.0_eval_v0.1.0 -f docker/Dockerfile-cu124_eval .
-```
 
 
 
