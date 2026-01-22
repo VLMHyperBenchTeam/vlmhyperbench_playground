@@ -1,0 +1,4 @@
+name: field_accuracy
+class_name: FieldAccuracy
+package: metric_registry
+version: 0.1.0

@@ -1,0 +1,26 @@
+[project]
+name = "orchestrator-service"
+version = "0.1.0"
+description = "VLMHyperBench Orchestrator Service (Host Layer)"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
+    "pydantic>=2.0.0",
+    "aiodocker>=0.23.0",
+    "redis>=5.0.0",
+    "orchestrator-core",
+    "task-registry",
+]
+
+[tool.uv.sources]
+orchestrator-core = { path = "../../packages/orchestrator_core", editable = true }
+task-registry = { path = "../../packages/task-registry", editable = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+managed = true

@@ -1,0 +1,12 @@
+name: qwen_snils_extraction
+task: snils_extraction
+dataset: snils_mini
+model_name: Qwen/Qwen2.5-VL-3B-Instruct
+docker_image: vllm/vllm-openai:v0.14.0
+metrics:
+  - structural_fidelity
+  - field_accuracy
+framework: vllm
+parameters:
+  max_tokens: 1024
+  temperature: 0.0

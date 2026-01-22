@@ -1,0 +1,13 @@
+name: snils_extraction
+description: Extraction of structured data from SNILS documents.
+entry_point: vlmhyperbench.bench_stages.run_vlm
+required_packages:
+  - dataset_factory
+  - metric_registry
+supported_metrics:
+  - structural_fidelity
+  - field_accuracy
+supported_reports:
+  - standard_markdown
+supported_frameworks:
+  - vllm

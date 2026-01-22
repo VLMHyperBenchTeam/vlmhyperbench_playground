@@ -1,0 +1,4 @@
+name: structural_fidelity
+class_name: StructuralFidelity
+package: metric_registry
+version: 0.1.0

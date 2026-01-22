@@ -1,0 +1,7 @@
+name: snils_mini
+description: Mini dataset of SNILS documents for testing.
+iterator_class: SnilsIterator
+path: data/snils
+source:
+  type: local
+  path: data/snils
